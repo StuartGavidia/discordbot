@@ -27,7 +27,6 @@ async def on_member_join(member):
         #return
 @client.event
 async def on_message(message):
-
     bot_quotes = [
         'Hello, I am a bot, � emoji.',
         'Bingo!',
@@ -53,5 +52,10 @@ async def on_message(message):
             await message.channel.send(f"Hey {person_name}: The result is: {result}")
         except Exception as e:
             await message.channel.send(f"Error in calculation: {e}")
+    elif message.content.startswith("Generate person"):
+        #generate image
+
+        #send image back
+        await message.channel.send(f"test")
         
 client.run(TOKEN)
