@@ -8,5 +8,6 @@ chorales/*
 glove/*
 monet2photo/*
 qa/*
+horse/*
 
 !.gitignore

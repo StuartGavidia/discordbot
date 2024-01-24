@@ -21,7 +21,7 @@ from utils.loaders import load_safari
 # run params
 SECTION = 'gan'
 RUN_ID = '0001'
-DATA_NAME = 'camel'
+DATA_NAME = 'horse'
 RUN_FOLDER = 'run/{}/'.format(SECTION)
 RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 

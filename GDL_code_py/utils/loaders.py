@@ -1,6 +1,8 @@
 import pickle
 import os
 
+from PIL import Image
+
 from keras.datasets import mnist, cifar100,cifar10
 from keras.preprocessing.image import ImageDataGenerator, load_img, save_img, img_to_array
 
@@ -178,43 +180,27 @@ def load_fashion_mnist(input_rows, input_cols, path='./data/fashion/fashion-mnis
     return X_train, y_train
 
 def load_safari(folder):
-
     mypath = os.path.join("./data", folder)
-    txt_name_list = []
-    for (dirpath, dirnames, filenames) in walk(mypath):
-        for f in filenames:
-            if f != '.DS_Store':
-                txt_name_list.append(f)
-                break
-
-    slice_train = int(80000/len(txt_name_list))  ###Setting value to be 80000 for the final dataset
+    image_list = []
+    labels = []
     i = 0
-    seed = np.random.randint(1, 10e6)
 
-    for txt_name in txt_name_list:
-        txt_path = os.path.join(mypath,txt_name)
-        x = np.load(txt_path)
-        x = (x.astype('float32') - 127.5) / 127.5
-        # x = x.astype('float32') / 255.0
-        
-        x = x.reshape(x.shape[0], 28, 28, 1)
-        
-        y = [i] * len(x)  
-        np.random.seed(seed)
-        np.random.shuffle(x)
-        np.random.seed(seed)
-        np.random.shuffle(y)
-        x = x[:slice_train]
-        y = y[:slice_train]
-        if i != 0: 
-            xtotal = np.concatenate((x,xtotal), axis=0)
-            ytotal = np.concatenate((y,ytotal), axis=0)
-        else:
-            xtotal = x
-            ytotal = y
-        i += 1
-        
-    return xtotal, ytotal
+    for filename in os.listdir(mypath):
+        if filename.endswith('.png'):
+            img = Image.open(os.path.join(mypath, filename))
+            img = img.resize((28, 28))  # Resize to the desired size
+            img = img.convert('L')  # Convert to grayscale
+            img = np.array(img)
+            img = (img.astype('float32') - 127.5) / 127.5
+            img = img.reshape(28, 28, 1)
+            
+            image_list.append(img)
+            labels.append(i)  # Assuming each image has a label 'i'
+
+    x = np.array(image_list)
+    y = np.array(labels)
+    
+    return x, y
 
 
 
