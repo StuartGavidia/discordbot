@@ -9,5 +9,6 @@ glove/*
 monet2photo/*
 qa/*
 horse/*
+face/*
 
 !.gitignore
