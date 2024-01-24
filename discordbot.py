@@ -13,7 +13,7 @@ from PIL import Image
 
 intents = discord.Intents.default()
 intents.message_content = True
-TOKEN = " MTE3OTE1MjU2NDg0ODE3MzA2Ng.GkogGL.4AwfXI4PZYx9za_dFxOn7b7UJMhaAqYwLzg6xQ" #  token for bot
+TOKEN = " MTE3OTE1MjU2NDg0ODE3MzA2Ng.GkogGL.4AwfXI4PZYx9za_dFxOn7b7UJMhaAqYwLzg6xQ" #token for bot
 
 client = discord.Client(intents=intents)
 
@@ -30,143 +30,142 @@ async def on_ready():
 async def on_member_join(member):
     await member.create_dm()
     await member.dm_channel.send(
-        f'Hi {member.name}, welcome to my Discord server!'
+        f'Hi {member.name}, welcome to the Discord server!'
     )
-
-    #if message.author == client.user:
-        #return
-    
 
 @client.event
 async def on_message(message):
-    bot_quotes = [
-        'Hello, I am a bot, � emoji.',
-        'Bingo!',
-        ('happy, cool, happy, cool, happy, cool '
-         'no doubt no doubt no doubt no doubt.')
-    ]
-    #print("get a new message")
-    #response = random.choice(bot_quotes)
+    if message.content.startswith('!calculate'):
+        await calculate_expression(message)
+    elif message.content.startswith("!generateVAE number"):
+        await generate_vae_number(message)
+    elif message.content.startswith("!generateGAN horse"):
+        await generate_gan_horse(message)
+    elif message.content == "!help":
+        await help_command(message)
 
-    #print(message.content)
-    #if message.content.startswith("wow"):
-    #    await message.channel.send(response)
-    if str(message.content) == 'wow!':
-        response = random.choice(bot_quotes)
-        await message.channel.send(response)
-    elif message.content.startswith('calculate'):       
-        expression = message.content.replace('calculate', '').strip()
-        person_name = message.author.name
+async def help_command(message):
+    help_text = (
+        "Available Commands:\n"
+        "!calculate <expression> - Calculates the result of a mathematical expression.\n"
+        "!generateVAE number <digit> - Generates a digit image using a VAE model.\n"
+        "!generateGAN horse - Generates an image of a horse using a GAN model.\n"
+    )
+    await message.channel.send(help_text)
 
-        try:
-            print(expression)
-            result = eval(expression)
-            await message.channel.send(f"Hey {person_name}: The result is: {result}")
-        except Exception as e:
-            await message.channel.send(f"Error in calculation: {e}")
-    elif message.content.startswith("generateVAE number"):
-        message_content = message.content.lower().strip()  
-        parts = message_content.split()
-        if len(parts) >= 3 and parts[1].lower() == "number" and parts[2].isdigit():
-            digit = int(parts[2]) 
-        else:
-            digit = 1  
+async def calculate_expression(message):
+    expression = message.content.replace('calculate', '').strip()
+    person_name = message.author.name
 
-        #ensure the digit is within the valid range for MNIST (0-9)
-        if digit not in range(10):
-            await message.channel.send("Please provide a valid digit (0-9).")
-            return
+    try:
+        print(expression)
+        result = eval(expression)
+        await message.channel.send(f"Hey {person_name}: The result is: {result}")
+    except Exception as e:
+        await message.channel.send(f"Error in calculation: {e}")
 
-        SECTION = 'vae'
-        RUN_ID = '0001'
-        DATA_NAME = 'digits'
-        RUN_FOLDER = 'run/{}/'.format(SECTION)
-        RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
+async def generate_vae_number(message):
+    message_content = message.content.lower().strip()  
+    parts = message_content.split()
+    if len(parts) >= 3 and parts[1].lower() == "number" and parts[2].isdigit():
+        digit = int(parts[2]) 
+    else:
+        digit = 1  
 
-        (x_train, y_train), (x_test, y_test) = load_mnist()
+    #ensure the digit is within the valid range for MNIST (0-9)
+    if digit not in range(10):
+        await message.channel.send("Please provide a valid digit (0-9).")
+        return
 
-        AE = load_model(Autoencoder, RUN_FOLDER)
+    SECTION = 'vae'
+    RUN_ID = '0001'
+    DATA_NAME = 'digits'
+    RUN_FOLDER = 'run/{}/'.format(SECTION)
+    RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 
-        desired_digits = [digit]
+    (x_train, y_train), (x_test, y_test) = load_mnist()
 
-        indices = []
-        for d in desired_digits:  
-            idx = np.where(y_test == d)[0]
-            indices.append(idx[0])  
+    AE = load_model(Autoencoder, RUN_FOLDER)
 
-        example_images = x_test[indices]
+    desired_digits = [digit]
 
-        z_points = AE.encoder.predict(example_images)
-        reconst_images = AE.decoder.predict(z_points)
+    indices = []
+    for d in desired_digits:  
+        idx = np.where(y_test == d)[0]
+        indices.append(idx[0])  
 
-        fig = plt.figure(figsize=(15, 3))
-        fig.subplots_adjust(hspace=0.4, wspace=0.4)
-        fig = plt.figure(figsize=(5, 5)) 
+    example_images = x_test[indices]
 
-        for i in range(len(indices)):
-            img = reconst_images[i].squeeze()
-            ax = fig.add_subplot(1, len(indices), i+1)
-            ax.axis('off')
-            ax.imshow(img, cmap='gray_r')
+    z_points = AE.encoder.predict(example_images)
+    reconst_images = AE.decoder.predict(z_points)
 
-        plt.tight_layout() 
+    fig = plt.figure(figsize=(15, 3))
+    fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    fig = plt.figure(figsize=(5, 5)) 
 
-        image_path = os.path.join(RUN_FOLDER, f"images/generated_number_{digit}.png")
-        fig.savefig(image_path)
-        plt.close(fig)
+    for i in range(len(indices)):
+        img = reconst_images[i].squeeze()
+        ax = fig.add_subplot(1, len(indices), i+1)
+        ax.axis('off')
+        ax.imshow(img, cmap='gray_r')
 
-        with open(image_path, 'rb') as f:
-            picture = discord.File(f)
-            await message.channel.send(file=picture)
-    elif message.content.startswith("generateGAN horse"):
-        def generate_images(generator, num_images):
-            random_latent_vectors = np.random.normal(size=(num_images, gan.z_dim))
+    plt.tight_layout() 
 
-            generated_images = generator.predict(random_latent_vectors)
+    image_path = os.path.join(RUN_FOLDER, f"images/generated_number_{digit}.png")
+    fig.savefig(image_path)
+    plt.close(fig)
 
-            return generated_images
+    with open(image_path, 'rb') as f:
+        picture = discord.File(f)
+        await message.channel.send(file=picture)
 
-        SECTION = 'gan'
-        RUN_ID = '0001'
-        DATA_NAME = 'horse'
-        RUN_FOLDER = 'run/{}/'.format(SECTION)
-        RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
+async def generate_gan_horse(message):
+    def generate_images(generator, num_images):
+        random_latent_vectors = np.random.normal(size=(num_images, gan.z_dim))
 
-        gan = GAN(input_dim = (28, 28, 3)  
-        , discriminator_conv_filters = [64, 64, 128, 128]
-        , discriminator_conv_kernel_size = [5, 5, 5, 5]
-        , discriminator_conv_strides = [2, 2, 2, 1]
-        , discriminator_batch_norm_momentum = None
-        , discriminator_activation = 'relu'
-        , discriminator_dropout_rate = 0.4
-        , discriminator_learning_rate = 0.0008
-        , generator_initial_dense_layer_size = (7, 7, 64)
-        , generator_upsample = [2, 2, 1, 1]
-        , generator_conv_filters = [128, 64, 64, 3]  
-        , generator_conv_kernel_size = [5, 5, 5, 5]
-        , generator_conv_strides = [1, 1, 1, 1]
-        , generator_batch_norm_momentum = 0.9
-        , generator_activation = 'relu'
-        , generator_dropout_rate = None
-        , generator_learning_rate = 0.0004
-        , optimiser = 'rmsprop'
-        , z_dim = 100
-        )
+        generated_images = generator.predict(random_latent_vectors)
 
-        gan.load_weights(os.path.join(RUN_FOLDER, 'weights/weights.h5'))
+        return generated_images
 
-        num_images = 1
-        generated_images = generate_images(gan.generator, num_images)
-        generated_image = (generated_images[0] + 1) * 127.5
-        generated_image = np.clip(generated_image, 0, 255).astype('uint8')
+    SECTION = 'gan'
+    RUN_ID = '0001'
+    DATA_NAME = 'horse'
+    RUN_FOLDER = 'run/{}/'.format(SECTION)
+    RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 
-        # Upscale the image
-        upscaled_image = Image.fromarray(generated_image).resize((256, 256))  # Example size
+    gan = GAN(input_dim = (28, 28, 3)  
+    , discriminator_conv_filters = [64, 64, 128, 128]
+    , discriminator_conv_kernel_size = [5, 5, 5, 5]
+    , discriminator_conv_strides = [2, 2, 2, 1]
+    , discriminator_batch_norm_momentum = None
+    , discriminator_activation = 'relu'
+    , discriminator_dropout_rate = 0.4
+    , discriminator_learning_rate = 0.0008
+    , generator_initial_dense_layer_size = (7, 7, 64)
+    , generator_upsample = [2, 2, 1, 1]
+    , generator_conv_filters = [128, 64, 64, 3]  
+    , generator_conv_kernel_size = [5, 5, 5, 5]
+    , generator_conv_strides = [1, 1, 1, 1]
+    , generator_batch_norm_momentum = 0.9
+    , generator_activation = 'relu'
+    , generator_dropout_rate = None
+    , generator_learning_rate = 0.0004
+    , optimiser = 'rmsprop'
+    , z_dim = 100
+    )
 
-        image_path = os.path.join(RUN_FOLDER, 'generated_horse.png')
-        upscaled_image.save(image_path)
+    gan.load_weights(os.path.join(RUN_FOLDER, 'weights/weights.h5'))
 
-        await message.channel.send(file=discord.File(image_path))
+    num_images = 1
+    generated_images = generate_images(gan.generator, num_images)
+    generated_image = (generated_images[0] + 1) * 127.5
+    generated_image = np.clip(generated_image, 0, 255).astype('uint8')
 
-        
+    upscaled_image = Image.fromarray(generated_image).resize((256, 256))  # Example size
+
+    image_path = os.path.join(RUN_FOLDER, 'generated_horse.png')
+    upscaled_image.save(image_path)
+
+    await message.channel.send(file=discord.File(image_path))
+
 client.run(TOKEN)
