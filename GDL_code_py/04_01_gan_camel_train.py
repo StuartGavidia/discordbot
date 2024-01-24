@@ -26,7 +26,8 @@ RUN_FOLDER = 'run/{}/'.format(SECTION)
 RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 
 if not os.path.exists(RUN_FOLDER):
-    os.mkdir(RUN_FOLDER)
+    # Ensures that all directories in the specified path are created; does nothing if they already exist
+    os.makedirs(RUN_FOLDER, exist_ok=True)
     os.mkdir(os.path.join(RUN_FOLDER, 'viz'))
     os.mkdir(os.path.join(RUN_FOLDER, 'images'))
     os.mkdir(os.path.join(RUN_FOLDER, 'weights'))
