@@ -52,7 +52,7 @@ x_train.shape
 # In[ ]:
 
 
-plt.imshow(x_train[200,:,:,0], cmap = 'gray')
+plt.imshow(x_train[200,:,:,0])
 
 
 # ## architecture
@@ -60,19 +60,19 @@ plt.imshow(x_train[200,:,:,0], cmap = 'gray')
 # In[ ]:
 
 
-gan = GAN(input_dim = (28,28,1)
-        , discriminator_conv_filters = [64,64,128,128]
-        , discriminator_conv_kernel_size = [5,5,5,5]
-        , discriminator_conv_strides = [2,2,2,1]
+gan = GAN(input_dim = (28, 28, 3)  # Updated to 3 channels for RGB images
+        , discriminator_conv_filters = [64, 64, 128, 128]
+        , discriminator_conv_kernel_size = [5, 5, 5, 5]
+        , discriminator_conv_strides = [2, 2, 2, 1]
         , discriminator_batch_norm_momentum = None
         , discriminator_activation = 'relu'
         , discriminator_dropout_rate = 0.4
         , discriminator_learning_rate = 0.0008
         , generator_initial_dense_layer_size = (7, 7, 64)
-        , generator_upsample = [2,2, 1, 1]
-        , generator_conv_filters = [128,64, 64,1]
-        , generator_conv_kernel_size = [5,5,5,5]
-        , generator_conv_strides = [1,1, 1, 1]
+        , generator_upsample = [2, 2, 1, 1]
+        , generator_conv_filters = [128, 64, 64, 3]  # Last layer updated to 3 channels
+        , generator_conv_kernel_size = [5, 5, 5, 5]
+        , generator_conv_strides = [1, 1, 1, 1]
         , generator_batch_norm_momentum = 0.9
         , generator_activation = 'relu'
         , generator_dropout_rate = None
@@ -105,7 +105,7 @@ gan.generator.summary()
 
 
 BATCH_SIZE = 64
-EPOCHS = 6000
+EPOCHS = 1500
 PRINT_EVERY_N_BATCHES = 5
 
 

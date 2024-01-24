@@ -189,10 +189,16 @@ def load_safari(folder):
         if filename.endswith('.png'):
             img = Image.open(os.path.join(mypath, filename))
             img = img.resize((28, 28))  # Resize to the desired size
-            img = img.convert('L')  # Convert to grayscale
+            
+            # Ensure the image is in RGB format
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+
             img = np.array(img)
+            
+            # Normalize the images to [-1, 1]
             img = (img.astype('float32') - 127.5) / 127.5
-            img = img.reshape(28, 28, 1)
+            img = img.reshape(28, 28, 3)
             
             image_list.append(img)
             labels.append(i)  # Assuming each image has a label 'i'
@@ -201,8 +207,6 @@ def load_safari(folder):
     y = np.array(labels)
     
     return x, y
-
-
 
 def load_cifar(label, num):
     if num == 10:
