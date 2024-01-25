@@ -57,7 +57,7 @@ async def help_command(message):
     await message.channel.send(help_text)
 
 async def calculate_expression(message):
-    expression = message.content.replace('calculate', '').strip()
+    expression = message.content.replace('!calculate', '').strip()
     person_name = message.author.name
 
     try:
