@@ -9,7 +9,7 @@ import re
 from IPython.display import clear_output
 
 from keras.layers import Dense, LSTM, Input, Embedding, Dropout
-from tensorflow.keras.utils import to_categorical
+from tensorflow.python.keras.utils import np_utils
 from keras.models import Model, load_model
 from keras.optimizers import Adam, RMSprop
 from keras.preprocessing.sequence import pad_sequences
