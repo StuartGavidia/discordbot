@@ -21,7 +21,7 @@ from utils.loaders import load_safari
 # run params
 SECTION = 'gan'
 RUN_ID = '0001'
-DATA_NAME = 'horse'
+DATA_NAME = 'face'
 RUN_FOLDER = 'run/{}/'.format(SECTION)
 RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 
@@ -105,8 +105,8 @@ gan.generator.summary()
 
 
 BATCH_SIZE = 64
-EPOCHS = 1500
-PRINT_EVERY_N_BATCHES = 5
+EPOCHS = 60000
+PRINT_EVERY_N_BATCHES = 1000
 
 
 # In[ ]:

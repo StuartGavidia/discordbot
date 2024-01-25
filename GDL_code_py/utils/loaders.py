@@ -186,7 +186,7 @@ def load_safari(folder):
     i = 0
 
     for filename in os.listdir(mypath):
-        if filename.endswith('.png'):
+        if filename.endswith('.png') or filename.endswith('jpg'):
             img = Image.open(os.path.join(mypath, filename))
             img = img.resize((28, 28))  # Resize to the desired size
             

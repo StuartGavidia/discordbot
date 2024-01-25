@@ -41,6 +41,8 @@ async def on_message(message):
         await generate_vae_number(message)
     elif message.content.startswith("!generateGAN horse"):
         await generate_gan_horse(message)
+    elif message.content.startswith("!generateGAN person"):
+        await generate_gan_person(message)
     elif message.content == "!help":
         await help_command(message)
 
@@ -50,6 +52,7 @@ async def help_command(message):
         "!calculate <expression> - Calculates the result of a mathematical expression.\n"
         "!generateVAE number <digit> - Generates a digit image using a VAE model.\n"
         "!generateGAN horse - Generates an image of a horse using a GAN model.\n"
+        "!generateGAN person - Generates an image of a person using a GAN model.\n"
     )
     await message.channel.send(help_text)
 
@@ -164,6 +167,55 @@ async def generate_gan_horse(message):
     upscaled_image = Image.fromarray(generated_image).resize((256, 256))  # Example size
 
     image_path = os.path.join(RUN_FOLDER, 'generated_horse.png')
+    upscaled_image.save(image_path)
+
+    await message.channel.send(file=discord.File(image_path))
+
+async def generate_gan_person(message):
+    def generate_images(generator, num_images):
+        random_latent_vectors = np.random.normal(size=(num_images, gan.z_dim))
+
+        generated_images = generator.predict(random_latent_vectors)
+
+        return generated_images
+
+    SECTION = 'gan'
+    RUN_ID = '0001'
+    DATA_NAME = 'face'
+    RUN_FOLDER = 'run/{}/'.format(SECTION)
+    RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
+
+    gan = GAN(input_dim = (28, 28, 3)  
+    , discriminator_conv_filters = [64, 64, 128, 128]
+    , discriminator_conv_kernel_size = [5, 5, 5, 5]
+    , discriminator_conv_strides = [2, 2, 2, 1]
+    , discriminator_batch_norm_momentum = None
+    , discriminator_activation = 'relu'
+    , discriminator_dropout_rate = 0.4
+    , discriminator_learning_rate = 0.0008
+    , generator_initial_dense_layer_size = (7, 7, 64)
+    , generator_upsample = [2, 2, 1, 1]
+    , generator_conv_filters = [128, 64, 64, 3]  
+    , generator_conv_kernel_size = [5, 5, 5, 5]
+    , generator_conv_strides = [1, 1, 1, 1]
+    , generator_batch_norm_momentum = 0.9
+    , generator_activation = 'relu'
+    , generator_dropout_rate = None
+    , generator_learning_rate = 0.0004
+    , optimiser = 'rmsprop'
+    , z_dim = 100
+    )
+
+    gan.load_weights(os.path.join(RUN_FOLDER, 'weights/weights.h5'))
+
+    num_images = 1
+    generated_images = generate_images(gan.generator, num_images)
+    generated_image = (generated_images[0] + 1) * 127.5
+    generated_image = np.clip(generated_image, 0, 255).astype('uint8')
+
+    upscaled_image = Image.fromarray(generated_image).resize((256, 256))  # Example size
+
+    image_path = os.path.join(RUN_FOLDER, 'generated_face.png')
     upscaled_image.save(image_path)
 
     await message.channel.send(file=discord.File(image_path))
