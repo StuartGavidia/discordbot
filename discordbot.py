@@ -356,7 +356,7 @@ async def generate_dalle_image(prompt):
         return None
     
 async def quiz_command(message):
-    topic = message.content[len('!quiz '):].strip() 
+    topic = message.content[len('!quiz '):].strip()
     if not topic:
         await message.channel.send("Please specify a topic for the quiz.")
         return
@@ -392,9 +392,9 @@ async def generate_quiz_question(topic):
             embed.add_field(name=f"Option {idx+1}", value=option, inline=False)
 
         emojis = ['\U00000031\U0000FE0F\U000020E3',  # 1️⃣
-          '\U00000032\U0000FE0F\U000020E3',  # 2️⃣
-          '\U00000033\U0000FE0F\U000020E3',  # 3️⃣
-          '\U00000034\U0000FE0F\U000020E3']  # 4️⃣
+                  '\U00000032\U0000FE0F\U000020E3',  # 2️⃣
+                  '\U00000033\U0000FE0F\U000020E3',  # 3️⃣
+                  '\U00000034\U0000FE0F\U000020E3']  # 4️⃣
 
         return {'embed': embed, 'emojis': emojis, 'answer': answer}
     except Exception as e:
