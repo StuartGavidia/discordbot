@@ -380,7 +380,7 @@ async def generate_quiz_question(topic):
                       {"role": "user", "content": "Create a multiple-choice quiz question about {topic}. Include 4 options and indicate the correct answer. I need to be able to parse your response. Separate the question on the first line, the 4 options on separate lines, and the answer on its own last line. Don't say anything else, in your response i just want 6 lines with what i asked for."}]
         )
         print(response)
-        content = response.choices[0].text.strip()
+        content = response.choices[0].message.content.strip()
 
         lines = content.split('\n')
         question = lines[0]
