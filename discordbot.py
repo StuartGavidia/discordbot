@@ -3,6 +3,7 @@ import random
 nest_asyncio.apply()
 import discord
 
+from discord import File
 from utils.loaders import load_mnist, load_model
 from models.AE import Autoencoder
 from models.GAN import GAN
@@ -11,11 +12,19 @@ import numpy as np
 import os
 from PIL import Image
 
+import openai
+import io
+import requests
+
 intents = discord.Intents.default()
 intents.message_content = True
-TOKEN = " MTE3OTE1MjU2NDg0ODE3MzA2Ng.GkogGL.4AwfXI4PZYx9za_dFxOn7b7UJMhaAqYwLzg6xQ" #token for bot
+TOKEN = " " #token for bot
+
+openai.api_key = ''
 
 client = discord.Client(intents=intents)
+
+authorized_users = ['']
 
 @client.event
 async def on_ready():
@@ -43,6 +52,28 @@ async def on_message(message):
         await generate_gan_horse(message)
     elif message.content.startswith("!generateGAN person"):
         await generate_gan_person(message)
+    elif message.content.startswith('!chatgpt'):
+        prompt = message.content[len('!chat '):] #extract prompt
+        response = await chatgpt_response(message)
+        if len(response) > 2000:
+            parts = split_long_message(response)
+            for part in parts:
+                await message.channel.send(part)
+        else:
+            await message.channel.send(response)
+    elif message.content.startswith('!dalle'):
+        prompt = message.content[len('!dalle '):] #extract prompt
+        image_bytes = await generate_dalle_image(prompt)
+        if image_bytes:
+            await message.channel.send(file=File(image_bytes, 'dalle_image.png'))
+        else:
+            await message.channel.send("Sorry, I couldn't generate an image for that prompt.")
+    elif message.content == "!terminate":
+        if str(message.author.id) in authorized_users:
+            await message.channel.send("Shutting down...")
+            await client.close()
+        else:
+            await message.channel.send("You do not have permission to use this command.")
     elif message.content == "!help":
         await help_command(message)
 
@@ -53,8 +84,14 @@ async def help_command(message):
         "!generateVAE number <digit> - Generates a digit image using a VAE model.\n"
         "!generateGAN horse - Generates an image of a horse using a GAN model.\n"
         "!generateGAN person - Generates an image of a person using a GAN model.\n"
+        "!chatgpt <prompt> - Interacts with the ChatGPT model to generate a text response.\n"
+        "!dalle <prompt> - Generates an image using DALL-E 3 based on the given prompt.\n"
+        "!terminate - Shuts down the bot (restricted to authorized users).\n"
     )
+
     await message.channel.send(help_text)
+
+
 
 async def calculate_expression(message):
     expression = message.content.replace('!calculate', '').strip()
@@ -219,5 +256,37 @@ async def generate_gan_person(message):
     upscaled_image.save(image_path)
 
     await message.channel.send(file=discord.File(image_path))
+
+async def chatgpt_response(message):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  
+            messages=[{"role": "system", "content": "You are a discord bot."},
+                      {"role": "user", "content": message.content}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error: {e}")
+        return "Sorry, I couldn't process that request."
+
+def split_long_message(message, max_length=2000):
+    return [message[i:i+max_length] for i in range(0, len(message), max_length)]
+
+async def generate_dalle_image(prompt):
+    try:
+        response = openai.Image.create(
+            model="dall-e-3",
+            prompt=prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1
+        )
+        image_url = response['data'][0]['url']  
+
+        image_bytes = io.BytesIO(requests.get(image_url).content)
+        return image_bytes
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 client.run(TOKEN)
