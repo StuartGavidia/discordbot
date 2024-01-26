@@ -96,6 +96,7 @@ async def help_command(message):
         "!generateGAN horse - Generates an image of a horse using a GAN model.\n"
         "!generateGAN person - Generates an image of a person using a GAN model.\n"
         "!chatgpt <prompt> - Interacts with the ChatGPT model to generate a text response.\n"
+        "!chatLSTM <prompt> - Generates text using an LSTM model based on the given prompt.\n"
         "!dalle <prompt> - Generates an image using DALL-E 3 based on the given prompt.\n"
         "!terminate - Shuts down the bot (restricted to authorized users).\n"
     )
