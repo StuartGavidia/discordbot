@@ -137,7 +137,8 @@ async def generate_vae_number(message):
 
     (x_train, y_train), (x_test, y_test) = load_mnist()
 
-    AE = load_model(Autoencoder, RUN_FOLDER)
+    MODEL_FOLDER = "weights" 
+    AE = load_model(Autoencoder, MODEL_FOLDER)
 
     desired_digits = [digit]
 
