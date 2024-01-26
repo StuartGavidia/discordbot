@@ -164,7 +164,7 @@ async def generate_vae_number(message):
 
     plt.tight_layout() 
 
-    image_path = os.path.join(RUN_FOLDER, f"images/generated_number_{digit}.png")
+    image_path = os.path.join(MODEL_FOLDER, f"images/generated_number_{digit}.png")
     fig.savefig(image_path)
     plt.close(fig)
 
