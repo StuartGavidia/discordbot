@@ -271,7 +271,7 @@ async def generate_gan_person(message):
 async def generate_chat_response(message):
     model = load_model_keras('./saved_models/aesop_dropout_100.h5')
     next_words = 200
-    temp = 0.8
+    temp = 0.94
     max_sequence_len = 30
     start_story = '| ' * max_sequence_len
 
