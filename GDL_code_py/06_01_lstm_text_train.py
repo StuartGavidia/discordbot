@@ -318,5 +318,5 @@ generate_human_led_text(model, 20)
 # In[20]:
 
 
-# model.save('./saved_models/aesop_no_dropout_100.h5')
+model.save('./saved_models/aesop_no_dropout_10.h5')
 
