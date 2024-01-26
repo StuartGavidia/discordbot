@@ -7,6 +7,7 @@
 import numpy as np
 import re
 from IPython.display import clear_output
+import os
 
 from keras.layers import Dense, LSTM, Input, Embedding, Dropout
 from keras.utils import to_categorical
@@ -23,6 +24,8 @@ from keras.callbacks import LambdaCallback
 load_saved_model = False
 train_model = True
 
+if not os.path.exists('saved_models'):
+    os.makedirs('saved_models')
 
 # In[3]:
 
