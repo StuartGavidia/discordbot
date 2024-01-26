@@ -117,15 +117,8 @@ async def on_message(message):
             await client.close()
         else:
             await message.channel.send("You do not have permission to use this command.")
-    elif message.content == "!listUserIDs":
-        await list_all_user_ids(message.guild, message.channel)
     elif message.content == "!help":
         await help_command(message)
-
-async def list_all_user_ids(guild, channel):
-    user_id_list = [str(member.id) for member in guild.members]
-    user_ids_string = "\n".join(user_id_list)
-    await channel.send(f"List of User IDs in {guild.name}:\n{user_ids_string}")
 
 async def help_command(message):
     help_text = (
@@ -152,7 +145,6 @@ async def calculate_expression(message):
     person_name = message.author.name
 
     try:
-        print(expression)
         result = eval(expression)
         await message.channel.send(f"Hey {person_name}: The result is: {result}")
     except Exception as e:
@@ -418,7 +410,6 @@ async def generate_quiz_question(topic):
             messages=[{"role": "system", "content": "You are my quiz data generator, you provide straight data"},
                       {"role": "user", "content": f"Create a multiple-choice quiz question about {topic}. Include 4 options and indicate the correct answer. I need to be able to parse your response. Separate the question on the first line, the 4 options on separate lines, and the answer on its own last line. Don't say anything else, in your response i just want 6 lines with what i asked for."}]
         )
-        print(response)
         content = response.choices[0].message.content.strip()
 
         lines = content.split('\n')
@@ -477,8 +468,6 @@ async def handle_translation_conversation(message):
 
 async def create_conversation_channel(guild, author, target_user_id):
     try:
-        print(target_user_id)
-        print(type(target_user_id))
         target_member = guild.get_member(int(target_user_id))
         if target_member is None:
             raise ValueError("Target user not found in the guild")
