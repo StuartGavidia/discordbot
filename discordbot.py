@@ -449,7 +449,10 @@ async def handle_translation_conversation(message):
         target_user_id = parts[4]
 
         conv_channel = await create_conversation_channel(message.guild, message.author, target_user_id)
-
+        if conv_channel is None:
+            await message.channel.send("Failed to create translation channel.")
+            return
+        
         translation_channels[conv_channel.id] = {
             "src_lang": src_lang,
             "target_lang": target_lang,
@@ -464,20 +467,24 @@ async def handle_translation_conversation(message):
         await message.channel.send("Usage: !translationConvo <source> <target> <text> <userid>")
 
 async def create_conversation_channel(guild, author, target_user_id):
-    channel_name = f"translate_{author.name}_{target_user_id}"
-
-    overwrites = {
-        guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        author: discord.PermissionOverwrite(read_messages=True),
-        guild.get_member(int(target_user_id)): discord.PermissionOverwrite(read_messages=True)
-    }
-
     try:
+        target_member = guild.get_member(int(target_user_id))
+        if target_member is None:
+            raise ValueError("Target user not found in the guild")
+
+        channel_name = f"translate_{author.name}_{target_member.name}"
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            author: discord.PermissionOverwrite(read_messages=True),
+            target_member: discord.PermissionOverwrite(read_messages=True)
+        }
+
+
         new_channel = await guild.create_text_channel(name=channel_name, overwrites=overwrites)
+        return new_channel
     except Exception as e:
         print(f"Error creating channel: {e}")
         return None
-    
-    return new_channel
+
 
 client.run(TOKEN)
