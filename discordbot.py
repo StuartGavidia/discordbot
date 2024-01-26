@@ -124,7 +124,7 @@ async def list_all_user_ids(guild, channel):
     user_id_list = [str(member.id) for member in guild.members]
     user_ids_string = "\n".join(user_id_list)
     await channel.send(f"List of User IDs in {guild.name}:\n{user_ids_string}")
-    
+
 async def help_command(message):
     help_text = (
         "Available Commands:\n"
@@ -454,6 +454,9 @@ async def handle_translation_conversation(message):
         target_lang = parts[2].lower()
         initial_text = parts[3]
         target_user_id = parts[4]
+
+        print(message.guild)
+        print(message.author)
 
         conv_channel = await create_conversation_channel(message.guild, message.author, target_user_id)
         if conv_channel is None:
