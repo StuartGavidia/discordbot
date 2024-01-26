@@ -101,6 +101,7 @@ async def help_command(message):
         "!chatgpt <prompt> - Interacts with the ChatGPT model to generate a text response.\n"
         "!chatLSTM <prompt> - Generates text using an LSTM model based on the given prompt.\n"
         "!dalle <prompt> - Generates an image using DALL-E 3 based on the given prompt.\n"
+        "!quiz <topic> - Generates a multiple-choice quiz question about the specified topic.\n"
         "!terminate - Shuts down the bot (restricted to authorized users).\n"
     )
 
