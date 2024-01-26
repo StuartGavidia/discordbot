@@ -2,6 +2,7 @@ import nest_asyncio
 import random
 nest_asyncio.apply()
 import discord
+import asyncio
 
 from discord import File
 from utils.loaders import load_mnist, load_model
@@ -79,6 +80,8 @@ async def on_message(message):
             await message.channel.send(file=File(image_bytes, 'dalle_image.png'))
         else:
             await message.channel.send("Sorry, I couldn't generate an image for that prompt.")
+    elif message.content.startswith('!quiz'):
+        await quiz_command(message)
     elif message.content == "!terminate":
         if str(message.author.id) in authorized_users:
             await message.channel.send("Shutting down...")
@@ -350,6 +353,52 @@ async def generate_dalle_image(prompt):
         return image_bytes
     except Exception as e:
         print(f"Error: {e}")
+        return None
+    
+async def quiz_command(message):
+    topic = message.content[len('!quiz '):].strip() 
+    if not topic:
+        await message.channel.send("Please specify a topic for the quiz.")
+        return
+
+    quiz_question = await generate_quiz_question(topic)
+    if quiz_question:
+        msg = await message.channel.send(embed=quiz_question['embed'])
+        for emoji in quiz_question['emojis']:
+            await msg.add_reaction(emoji)
+
+        await asyncio.sleep(10)
+        await message.channel.send(f"The correct answer is: {quiz_question['answer']}")
+    else:
+        await message.channel.send("Sorry, I couldn't generate a quiz question for that topic.")
+
+async def generate_quiz_question(topic):
+    try:
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=f"Create a multiple-choice quiz question about {topic}. Include 4 options and indicate the correct answer. I need to be able to parse your response. Separate the question on the first line, the 4 options on separate lines, and the answer on its own last line",
+            temperature=0.7,
+            max_tokens=150
+        )
+        content = response.choices[0].text.strip()
+
+        lines = content.split('\n')
+        question = lines[0]
+        options = lines[1:5]
+        answer = lines[5]
+
+        embed = discord.Embed(title=question, color=discord.Color.blue())
+        for idx, option in enumerate(options):
+            embed.add_field(name=f"Option {idx+1}", value=option, inline=False)
+
+        emojis = ['\U00000031\U0000FE0F\U000020E3',  # 1️⃣
+          '\U00000032\U0000FE0F\U000020E3',  # 2️⃣
+          '\U00000033\U0000FE0F\U000020E3',  # 3️⃣
+          '\U00000034\U0000FE0F\U000020E3']  # 4️⃣
+
+        return {'embed': embed, 'emojis': emojis, 'answer': answer}
+    except Exception as e:
+        print(f"Error generating quiz question: {e}")
         return None
 
 client.run(TOKEN)
