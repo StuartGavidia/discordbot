@@ -17,6 +17,8 @@ import os
 from PIL import Image
 import json
 
+from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
+
 import openai
 import io
 import requests
@@ -82,6 +84,17 @@ async def on_message(message):
             await message.channel.send("Sorry, I couldn't generate an image for that prompt.")
     elif message.content.startswith('!quiz'):
         await quiz_command(message)
+    if message.content.startswith('!translate'):
+        parts = message.content.split()
+        if len(parts) >= 4:
+            src_lang = parts[-2]
+            target_lang = parts[-1]
+            text_to_translate = ' '.join(parts[1:-2])
+
+            translation = await translate_message(text_to_translate, src_lang, target_lang)
+            await message.channel.send(translation)
+        else:
+            await message.channel.send("Usage: !translate <text> <source language> <target language>")
     elif message.content == "!terminate":
         if str(message.author.id) in authorized_users:
             await message.channel.send("Shutting down...")
@@ -401,5 +414,14 @@ async def generate_quiz_question(topic):
     except Exception as e:
         print(f"Error generating quiz question: {e}")
         return None
+
+model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M")
+tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M")
+
+async def translate_message(text, src_lang, target_lang):
+    tokenizer.src_lang = src_lang
+    encoded = tokenizer(text, return_tensors="pt")
+    generated_tokens = model.generate(**encoded, forced_bos_token_id=tokenizer.get_lang_id(target_lang))
+    return tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
 
 client.run(TOKEN)
