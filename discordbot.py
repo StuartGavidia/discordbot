@@ -85,16 +85,16 @@ async def on_message(message):
     elif message.content.startswith('!quiz'):
         await quiz_command(message)
     if message.content.startswith('!translate'):
-        parts = message.content.split()
-        if len(parts) >= 4:
-            src_lang = parts[-2]
-            target_lang = parts[-1]
-            text_to_translate = ' '.join(parts[1:-2])
+        parts = message.content.split(maxsplit=3)  
+        if len(parts) == 4:
+            src_lang = parts[1].lower()  
+            target_lang = parts[2].lower() 
+            text_to_translate = parts[3] 
 
             translation = await translate_message(text_to_translate, src_lang, target_lang)
             await message.channel.send(translation)
         else:
-            await message.channel.send("Usage: !translate <text> <source language> <target language>")
+            await message.channel.send("Usage: !translate <source> <target> <text>")
     elif message.content == "!terminate":
         if str(message.author.id) in authorized_users:
             await message.channel.send("Shutting down...")
@@ -115,6 +115,7 @@ async def help_command(message):
         "!chatLSTM <prompt> - Generates text using an LSTM model based on the given prompt.\n"
         "!dalle <prompt> - Generates an image using DALL-E 3 based on the given prompt.\n"
         "!quiz <topic> - Generates a multiple-choice quiz question about the specified topic.\n"
+        "!translate <source> <target> <text> - Translates text from the source language to the target language.\n"
         "!terminate - Shuts down the bot (restricted to authorized users).\n"
     )
 
