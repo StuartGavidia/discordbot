@@ -49,6 +49,9 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
+    if message.author == client.user:
+        return
+    
     if message.content.startswith('!calculate'):
         await calculate_expression(message)
     elif message.content.startswith("!generateVAE number"):
@@ -267,9 +270,9 @@ async def generate_gan_person(message):
 
 async def generate_chat_response(message):
     model = load_model_keras('./saved_models/aesop_dropout_100.h5')
-    next_words = 1
+    next_words = 200
     temp = 0.2
-    max_sequence_len = 1  # Consider increasing this if it's feasible for your model
+    max_sequence_len = 20  # Consider increasing this if it's feasible for your model
     start_story = '| ' * max_sequence_len
 
     seed_text = message.content
