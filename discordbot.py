@@ -115,9 +115,16 @@ async def on_message(message):
             await client.close()
         else:
             await message.channel.send("You do not have permission to use this command.")
+    elif message.content == "!listUserIDs":
+        await list_all_user_ids(message.guild, message.channel)
     elif message.content == "!help":
         await help_command(message)
 
+async def list_all_user_ids(guild, channel):
+    user_id_list = [str(member.id) for member in guild.members]
+    user_ids_string = "\n".join(user_id_list)
+    await channel.send(f"List of User IDs in {guild.name}:\n{user_ids_string}")
+    
 async def help_command(message):
     help_text = (
         "Available Commands:\n"
