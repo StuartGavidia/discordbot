@@ -262,13 +262,14 @@ async def generate_gan_person(message):
 
     await message.channel.send(file=discord.File(image_path))
 
-async def generate_chat_response(seed_text):
+async def generate_chat_response(message):
     model = load_model_keras('./saved_models/aesop_dropout_100.h5')
     next_words = 250
     temp = 0.2
     max_sequence_len = 20
     start_story = '| ' * max_sequence_len
-    
+
+    seed_text = message.content
     output_text = seed_text
     seed_text = start_story + seed_text
 
