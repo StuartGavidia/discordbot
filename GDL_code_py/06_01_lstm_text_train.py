@@ -270,7 +270,7 @@ seed_text = "the frog and the snake . "
 gen_words = 500
 temp = 0.1
 
-print (generate_text(seed_text, gen_words, model, seq_length, temp))
+#print (generate_text(seed_text, gen_words, model, seq_length, temp))
 
 
 # In[53]:
@@ -315,7 +315,7 @@ def generate_human_led_text(model, max_sequence_len):
 # In[54]:
 
 
-generate_human_led_text(model, 20)
+#generate_human_led_text(model, 20)
 
 
 # In[20]:
