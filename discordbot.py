@@ -377,8 +377,9 @@ async def generate_quiz_question(topic):
         response = openai.ChatCompletion.create(
             model="gpt-4",  
             messages=[{"role": "system", "content": "You are my quiz data generator, you provide straight data"},
-                      {"role": "user", "content": "Create a multiple-choice quiz question about {topic}. Include 4 options and indicate the correct answer. I need to be able to parse your response. Separate the question on the first line, the 4 options on separate lines, and the answer on its own last line"}]
+                      {"role": "user", "content": "Create a multiple-choice quiz question about {topic}. Include 4 options and indicate the correct answer. I need to be able to parse your response. Separate the question on the first line, the 4 options on separate lines, and the answer on its own last line. Don't say anything else, in your response i just want 6 lines with what i asked for."}]
         )
+        print(response)
         content = response.choices[0].text.strip()
 
         lines = content.split('\n')
