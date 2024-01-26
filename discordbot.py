@@ -5,6 +5,7 @@ import discord
 
 from discord import File
 from utils.loaders import load_mnist, load_model
+from keras.models import load_model as load_model_keras
 from models.AE import Autoencoder
 from models.GAN import GAN
 import matplotlib.pyplot as plt
@@ -262,7 +263,7 @@ async def generate_gan_person(message):
     await message.channel.send(file=discord.File(image_path))
 
 async def generate_chat_response(seed_text):
-    model = load_model('./saved_models/aesop_dropout_100.h5')
+    model = load_model_keras('./saved_models/aesop_dropout_100.h5')
     next_words = 250
     temp = 0.2
     max_sequence_len = 20
