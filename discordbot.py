@@ -468,6 +468,8 @@ async def handle_translation_conversation(message):
 
 async def create_conversation_channel(guild, author, target_user_id):
     try:
+        print(target_user_id)
+        print(type(target_user_id))
         target_member = guild.get_member(int(target_user_id))
         if target_member is None:
             raise ValueError("Target user not found in the guild")
