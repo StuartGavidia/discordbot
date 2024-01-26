@@ -7,6 +7,7 @@ from discord import File
 from utils.loaders import load_mnist, load_model
 from keras.models import load_model as load_model_keras
 from keras.preprocessing.text import tokenizer_from_json
+from keras.preprocessing.sequence import pad_sequences
 from models.AE import Autoencoder
 from models.GAN import GAN
 import matplotlib.pyplot as plt
@@ -266,9 +267,9 @@ async def generate_gan_person(message):
 
 async def generate_chat_response(message):
     model = load_model_keras('./saved_models/aesop_dropout_100.h5')
-    next_words = 10
+    next_words = 1
     temp = 0.2
-    max_sequence_len = 1
+    max_sequence_len = 1  # Consider increasing this if it's feasible for your model
     start_story = '| ' * max_sequence_len
 
     seed_text = message.content
@@ -278,29 +279,28 @@ async def generate_chat_response(message):
     with open('tokenizer.json') as f:
         data = json.load(f)
         tokenizer = tokenizer_from_json(data)
-    
+
     for _ in range(next_words):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
         if not token_list:
-            break  # Break the loop if token_list is empty
+            break
 
-        token_list = token_list[-max_sequence_len:]
-        token_list = np.reshape(token_list, (1, max_sequence_len))
-        
-        probs = model.predict(token_list, verbose=0)[0]
-        y_class = sample_with_temp(probs, temperature = temp)
-        
+        token_list = pad_sequences([token_list], maxlen=max_sequence_len, padding='post')[0]
+
+        probs = model.predict(np.array([token_list]), verbose=0)[0]
+        y_class = sample_with_temp(probs, temperature=temp)
+
         if y_class == 0:
-            output_word = ''
-        else:
-            output_word = tokenizer.index_word.get(y_class, '')
-            
+            break
+
+        output_word = tokenizer.index_word.get(y_class, '')
+
         if output_word == "|" or not output_word:
             break
-        
+
         output_text += output_word + ' '
         seed_text = output_text[-max_sequence_len:]
-        
+
     await message.channel.send(output_text)
     
 
