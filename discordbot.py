@@ -107,7 +107,7 @@ async def on_message(message):
             await message.channel.send(translation)
         else:
             await message.channel.send("Usage: !translate <source> <target> <text>")
-    elif message.content.startswith('!translateConvo'):
+    elif message.content.startswith('!translationConvo'):
         await handle_translation_conversation(message)
     elif message.content == "!terminate":
         if str(message.author.id) in authorized_users:
@@ -130,7 +130,7 @@ async def help_command(message):
         "!dalle <prompt> - Generates an image using DALL-E 3 based on the given prompt.\n"
         "!quiz <topic> - Generates a multiple-choice quiz question about the specified topic.\n"
         "!translate <source> <target> <text> - Translates text from the source language to the target language.\n"
-        "!translateConvo <source> <target> <text> <userid> - Starts a translated conversation in a new channel with another user.\n"
+        "!translationConvo <source> <target> <text> <userid> - Starts a translated conversation in a new channel with another user.\n"
         "!terminate - Shuts down the bot (restricted to authorized users).\n"
     )
 
@@ -461,7 +461,7 @@ async def handle_translation_conversation(message):
         await conv_channel.send(f"{message.author.mention}: {initial_text}\n{translation}")
         print("Channel has been created: " + conv_channel)
     else:
-        await message.channel.send("Usage: !translateConvo <source> <target> <text> <userid>")
+        await message.channel.send("Usage: !translationConvo <source> <target> <text> <userid>")
 
 async def create_conversation_channel(guild, author, target_user_id):
     channel_name = f"translate_{author.name}_{target_user_id}"
