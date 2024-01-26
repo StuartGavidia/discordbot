@@ -117,14 +117,13 @@ async def calculate_expression(message):
         await message.channel.send(f"Error in calculation: {e}")
 
 async def generate_vae_number(message):
-    message_content = message.content.lower().strip()  
+    message_content = message.content.lower().strip()
     parts = message_content.split()
     if len(parts) >= 3 and parts[1].lower() == "number" and parts[2].isdigit():
-        digit = int(parts[2]) 
+        digit = int(parts[2])
     else:
-        digit = 1  
+        digit = 1
 
-    #ensure the digit is within the valid range for MNIST (0-9)
     if digit not in range(10):
         await message.channel.send("Please provide a valid digit (0-9).")
         return
@@ -137,34 +136,37 @@ async def generate_vae_number(message):
 
     (x_train, y_train), (x_test, y_test) = load_mnist()
 
-    MODEL_FOLDER = "weights/numberVAE" 
+    MODEL_FOLDER = "weights/numberVAE"
     AE = load_model(Autoencoder, MODEL_FOLDER)
 
     desired_digits = [digit]
 
     indices = []
-    for d in desired_digits:  
+    for d in desired_digits:
         idx = np.where(y_test == d)[0]
-        indices.append(idx[0])  
+        indices.append(idx[0])
 
     example_images = x_test[indices]
 
     z_points = AE.encoder.predict(example_images)
     reconst_images = AE.decoder.predict(z_points)
 
-    fig = plt.figure(figsize=(15, 3))
+    images_dir = os.path.join(MODEL_FOLDER, "images")
+    if not os.path.exists(images_dir):
+        os.makedirs(images_dir)
+
+    fig = plt.figure(figsize=(5, 5))
     fig.subplots_adjust(hspace=0.4, wspace=0.4)
-    fig = plt.figure(figsize=(5, 5)) 
 
     for i in range(len(indices)):
         img = reconst_images[i].squeeze()
-        ax = fig.add_subplot(1, len(indices), i+1)
+        ax = fig.add_subplot(1, len(indices), i + 1)
         ax.axis('off')
         ax.imshow(img, cmap='gray_r')
 
-    plt.tight_layout() 
+    plt.tight_layout()
 
-    image_path = os.path.join(MODEL_FOLDER, f"images/generated_number_{digit}.png")
+    image_path = os.path.join(images_dir, f"generated_number_{digit}.png")
     fig.savefig(image_path)
     plt.close(fig)
 
