@@ -64,6 +64,7 @@ text = text.replace('\n\n\n\n\n', start_story)
 text = text.replace('\n', ' ')
 text = re.sub('  +', '. ', text).strip()
 text = text.replace('..', '.')
+text = text.replace('-', ' ')
 
 text = re.sub('([!"#$%&()*+,-./:;<=>?@[\]^_`{|}~])', r' \1 ', text)
 text = re.sub('\s{2,}', ' ', text)
@@ -109,11 +110,6 @@ total_words
 
 print(tokenizer.word_index)
 print(token_list)
-
-# After training and fitting the tokenizer
-tokenizer_json = tokenizer.to_json()
-with open('tokenizer.json', 'w', encoding='utf-8') as f:
-    f.write(json.dumps(tokenizer_json, ensure_ascii=False))
 
 
 # In[11]:
@@ -261,6 +257,10 @@ if train_model:
     callback = LambdaCallback(on_epoch_end=on_epoch_end)
     model.fit(X, y, epochs=epochs, batch_size=batch_size, callbacks = [callback], shuffle = True)
 
+# After training and fitting the tokenizer
+tokenizer_json = tokenizer.to_json()
+with open('tokenizer.json', 'w', encoding='utf-8') as f:
+    f.write(json.dumps(tokenizer_json, ensure_ascii=False))
 
 
 # In[51]:
