@@ -15,6 +15,7 @@ from PIL import Image
 import openai
 import io
 import requests
+from keras.preprocessing.text import Tokenizer
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -52,8 +53,11 @@ async def on_message(message):
         await generate_gan_horse(message)
     elif message.content.startswith("!generateGAN person"):
         await generate_gan_person(message)
+    elif message.content.startswith("!chatLSTM"):
+        prompt = message.content[len('!chatLSTM '):] #extract prompt
+        await generate_chat_response(message)
     elif message.content.startswith('!chatgpt'):
-        prompt = message.content[len('!chat '):] #extract prompt
+        prompt = message.content[len('!chatgpt '):] #extract prompt
         response = await chatgpt_response(message)
         if len(response) > 2000:
             parts = split_long_message(response)
@@ -256,6 +260,50 @@ async def generate_gan_person(message):
     upscaled_image.save(image_path)
 
     await message.channel.send(file=discord.File(image_path))
+
+async def generate_chat_response(seed_text):
+    model = load_model('./saved_models/aesop_dropout_100.h5')
+    next_words = 250
+    temp = 0.2
+    max_sequence_len = 20
+    start_story = '| ' * max_sequence_len
+    
+    output_text = seed_text
+    seed_text = start_story + seed_text
+
+    tokenizer = Tokenizer(char_level = False, filters = '')
+    
+    for _ in range(next_words):
+        token_list = tokenizer.texts_to_sequences([seed_text])[0]
+        token_list = token_list[-max_sequence_len:]
+        token_list = np.reshape(token_list, (1, max_sequence_len))
+        
+        probs = model.predict(token_list, verbose=0)[0]
+        y_class = sample_with_temp(probs, temperature = temp)
+        
+        if y_class == 0:
+            output_word = ''
+        else:
+            output_word = tokenizer.index_word[y_class]
+            
+        if output_word == "|":
+            break
+        
+        output_text += output_word + ' '
+        seed_text += output_word + ' '
+        
+            
+            
+    return output_text
+
+def sample_with_temp(preds, temperature=1.0):
+    # helper function to sample an index from a probability array
+    preds = np.asarray(preds).astype('float64')
+    preds = np.log(preds) / temperature
+    exp_preds = np.exp(preds)
+    preds = exp_preds / np.sum(exp_preds)
+    probas = np.random.multinomial(1, preds, 1)
+    return np.argmax(probas)
 
 async def chatgpt_response(message):
     try:
