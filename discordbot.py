@@ -457,9 +457,6 @@ async def handle_translation_conversation(message):
         initial_text = parts[3]
         target_user_id = parts[4]
 
-        print(message.guild)
-        print(message.author)
-
         conv_channel = await create_conversation_channel(message.guild, message.author, target_user_id)
         if conv_channel is None:
             await message.channel.send("Failed to create translation channel.")
@@ -474,7 +471,7 @@ async def handle_translation_conversation(message):
 
         translation = await translate_message(initial_text, src_lang, target_lang)
         await conv_channel.send(f"{message.author.mention}: {initial_text}\n{translation}")
-        print("Channel has been created: " + conv_channel)
+        print("Channel has been created: " + str(conv_channel))
     else:
         await message.channel.send("Usage: !translationConvo <source> <target> <text> <userid>")
 
