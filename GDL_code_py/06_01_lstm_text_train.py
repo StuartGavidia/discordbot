@@ -9,7 +9,7 @@ import re
 from IPython.display import clear_output
 
 from keras.layers import Dense, LSTM, Input, Embedding, Dropout
-from tensorflow.python.keras.utils import np_utils
+from keras.utils import to_categorical
 from keras.models import Model, load_model
 from keras.optimizers import Adam, RMSprop
 from keras.preprocessing.sequence import pad_sequences
@@ -21,7 +21,7 @@ from keras.callbacks import LambdaCallback
 
 
 load_saved_model = False
-train_model = False
+train_model = True
 
 
 # In[3]:
@@ -44,8 +44,8 @@ with open(filename, encoding='utf-8-sig') as f:
     
     
 #removing text before and after the main stories
-start = text.find("THE FOX AND THE GRAPES\n\n\n")
-end = text.find("ILLUSTRATIONS\n\n\n[")
+start = text.find("The Project Gutenberg eBook of A history of the Brazil")
+end = text.find("subscribe to our email newsletter to hear about new eBooks.\n\n\n")
 text = text[start:end]
 
 
@@ -120,7 +120,7 @@ def generate_sequences(token_list, step):
         y.append(token_list[i + seq_length])
     
 
-    y = np_utils.to_categorical(y, num_classes = total_words)
+    y = to_categorical(y, num_classes = total_words)
     
     num_seq = len(X)
     print('Number of sequences:', num_seq, "\n")
