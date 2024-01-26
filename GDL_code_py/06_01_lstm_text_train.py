@@ -246,7 +246,7 @@ def on_epoch_end(epoch, logs):
     
     
 if train_model:
-    epochs = 1000
+    epochs = 10
     batch_size = 32
     num_batches = int(len(X) / batch_size)
     callback = LambdaCallback(on_epoch_end=on_epoch_end)
