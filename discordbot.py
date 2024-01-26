@@ -298,9 +298,8 @@ async def generate_chat_response(message):
         output_text += output_word + ' '
         seed_text += output_word + ' '
         
-            
-            
-    return output_text
+    await message.channel.send(output_text)
+    
 
 def sample_with_temp(preds, temperature=1.0):
     # helper function to sample an index from a probability array
