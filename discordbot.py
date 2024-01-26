@@ -459,6 +459,7 @@ async def handle_translation_conversation(message):
 
         translation = await translate_message(initial_text, src_lang, target_lang)
         await conv_channel.send(f"{message.author.mention}: {initial_text}\n{translation}")
+        print("Channel has been created: " + conv_channel)
     else:
         await message.channel.send("Usage: !translateConvo <source> <target> <text> <userid>")
 
@@ -471,7 +472,12 @@ async def create_conversation_channel(guild, author, target_user_id):
         guild.get_member(int(target_user_id)): discord.PermissionOverwrite(read_messages=True)
     }
 
-    new_channel = await guild.create_text_channel(name=channel_name, overwrites=overwrites)
+    try:
+        new_channel = await guild.create_text_channel(name=channel_name, overwrites=overwrites)
+    except Exception as e:
+        print(f"Error creating channel: {e}")
+        return None
+    
     return new_channel
 
 client.run(TOKEN)
