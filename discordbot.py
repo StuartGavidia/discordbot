@@ -490,7 +490,8 @@ async def create_conversation_channel(guild, author, target_user_id):
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
             author: discord.PermissionOverwrite(read_messages=True),
-            target_member: discord.PermissionOverwrite(read_messages=True)
+            target_member: discord.PermissionOverwrite(read_messages=True),
+            guild.me: discord.PermissionOverwrite(read_messages=True)
         }
 
 
