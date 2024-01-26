@@ -33,6 +33,7 @@ openai.api_key = ''
 client = discord.Client(intents=intents)
 
 authorized_users = ['']
+translation_channels = {}
 
 @client.event
 async def on_ready():
@@ -53,6 +54,17 @@ async def on_member_join(member):
 @client.event
 async def on_message(message):
     if message.author == client.user:
+        return
+    
+    #handle translation channels
+    if message.channel.id in translation_channels:
+        channel_info = translation_channels[message.channel.id]
+        if message.author.id == int(channel_info["user1"]):
+            translation = await translate_message(message.content, channel_info["src_lang"], channel_info["target_lang"])
+        else:
+            translation = await translate_message(message.content, channel_info["target_lang"], channel_info["src_lang"])
+
+        await message.channel.send(translation)
         return
     
     if message.content.startswith('!calculate'):
@@ -84,7 +96,7 @@ async def on_message(message):
             await message.channel.send("Sorry, I couldn't generate an image for that prompt.")
     elif message.content.startswith('!quiz'):
         await quiz_command(message)
-    if message.content.startswith('!translate'):
+    elif message.content.startswith('!translate'):
         parts = message.content.split(maxsplit=3)  
         if len(parts) == 4:
             src_lang = parts[1].lower()  
@@ -95,6 +107,8 @@ async def on_message(message):
             await message.channel.send(translation)
         else:
             await message.channel.send("Usage: !translate <source> <target> <text>")
+    elif message.content.startswith('!translateConvo'):
+        await handle_translation_conversation(message)
     elif message.content == "!terminate":
         if str(message.author.id) in authorized_users:
             await message.channel.send("Shutting down...")
@@ -116,6 +130,7 @@ async def help_command(message):
         "!dalle <prompt> - Generates an image using DALL-E 3 based on the given prompt.\n"
         "!quiz <topic> - Generates a multiple-choice quiz question about the specified topic.\n"
         "!translate <source> <target> <text> - Translates text from the source language to the target language.\n"
+        "!translateConvo <source> <target> <text> <userid> - Starts a translated conversation in a new channel with another user.\n"
         "!terminate - Shuts down the bot (restricted to authorized users).\n"
     )
 
@@ -424,5 +439,39 @@ async def translate_message(text, src_lang, target_lang):
     encoded = tokenizer(text, return_tensors="pt")
     generated_tokens = model.generate(**encoded, forced_bos_token_id=tokenizer.get_lang_id(target_lang))
     return tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+
+async def handle_translation_conversation(message):
+    parts = message.content.split(maxsplit=4)
+    if len(parts) == 5:
+        src_lang = parts[1].lower()
+        target_lang = parts[2].lower()
+        initial_text = parts[3]
+        target_user_id = parts[4]
+
+        conv_channel = await create_conversation_channel(message.guild, message.author, target_user_id)
+
+        translation_channels[conv_channel.id] = {
+            "src_lang": src_lang,
+            "target_lang": target_lang,
+            "user1": message.author.id,
+            "user2": target_user_id
+        }
+
+        translation = await translate_message(initial_text, src_lang, target_lang)
+        await conv_channel.send(f"{message.author.mention}: {initial_text}\n{translation}")
+    else:
+        await message.channel.send("Usage: !translateConvo <source> <target> <text> <userid>")
+
+async def create_conversation_channel(guild, author, target_user_id):
+    channel_name = f"translate_{author.name}_{target_user_id}"
+
+    overwrites = {
+        guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        author: discord.PermissionOverwrite(read_messages=True),
+        guild.get_member(int(target_user_id)): discord.PermissionOverwrite(read_messages=True)
+    }
+
+    new_channel = await guild.create_text_channel(name=channel_name, overwrites=overwrites)
+    return new_channel
 
 client.run(TOKEN)
