@@ -206,7 +206,7 @@ async def generate_gan_horse(message):
     , z_dim = 100
     )
 
-    gan.load_weights(os.path.join(RUN_FOLDER, 'weights/weights.h5'))
+    gan.load_weights(os.path.join('', 'weights/weights_horse.h5'))
 
     num_images = 1
     generated_images = generate_images(gan.generator, num_images)
@@ -255,7 +255,7 @@ async def generate_gan_person(message):
     , z_dim = 100
     )
 
-    gan.load_weights(os.path.join(RUN_FOLDER, 'weights/weights.h5'))
+    gan.load_weights(os.path.join('', 'weights/weights_face.h5'))
 
     num_images = 1
     generated_images = generate_images(gan.generator, num_images)
