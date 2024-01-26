@@ -8,6 +8,7 @@ import numpy as np
 import re
 from IPython.display import clear_output
 import os
+import json
 
 from keras.layers import Dense, LSTM, Input, Embedding, Dropout
 from keras.utils import to_categorical
@@ -108,6 +109,11 @@ total_words
 
 print(tokenizer.word_index)
 print(token_list)
+
+# After training and fitting the tokenizer
+tokenizer_json = tokenizer.to_json()
+with open('tokenizer.json', 'w', encoding='utf-8') as f:
+    f.write(json.dumps(tokenizer_json, ensure_ascii=False))
 
 
 # In[11]:

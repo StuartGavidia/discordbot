@@ -6,12 +6,14 @@ import discord
 from discord import File
 from utils.loaders import load_mnist, load_model
 from keras.models import load_model as load_model_keras
+from keras.preprocessing.text import tokenizer_from_json
 from models.AE import Autoencoder
 from models.GAN import GAN
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image
+import json
 
 import openai
 import io
@@ -273,7 +275,9 @@ async def generate_chat_response(message):
     output_text = seed_text
     seed_text = start_story + seed_text
 
-    tokenizer = Tokenizer(char_level = False, filters = '')
+    with open('tokenizer.json') as f:
+        data = json.load(f)
+        tokenizer = tokenizer_from_json(data)
     
     for _ in range(next_words):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
